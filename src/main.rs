@@ -14,10 +14,18 @@ fn main() -> ExitCode {
         stdin.read_line(&mut input).unwrap();
         input = input.trim().to_string();
 
-        if input == "exit 0" {
-            return ExitCode::from(0);
+        // A match case below could be better, probably.
+        if let Some(command) = input.split(' ').next() {
+            if command == "echo" {
+                for w in input.split(' ').skip(1) {
+                    print!("{w} ");
+                }
+                println!();
+            } else if command == "exit" {
+                return ExitCode::from(0);
+            } else {
+                println!("{}: command not found", input);
+            }
         }
-
-        println!("{}: command not found", input);
     }
 }
