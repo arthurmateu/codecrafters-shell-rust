@@ -1,11 +1,10 @@
 #[allow(unused_imports)]
-use std::io::{self, Write};
+use std::{
+    io::{self, Write},
+    process::ExitCode,
+};
 
-pub fn run_command(command: String) -> String {
-    format!("{command}: command not found")
-}
-
-fn main() {
+fn main() -> ExitCode {
     loop {
         print!("$ ");
         io::stdout().flush().unwrap();
@@ -13,7 +12,12 @@ fn main() {
         let stdin = io::stdin();
         let mut input = String::new();
         stdin.read_line(&mut input).unwrap();
+        input = input.trim().to_string();
 
-        println!("{}", run_command(input.trim().to_string()));
+        if input == "exit 0" {
+            return ExitCode::from(0);
+        }
+
+        println!("{}: command not found", input);
     }
 }
