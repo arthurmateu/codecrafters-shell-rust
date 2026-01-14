@@ -1,32 +1,9 @@
 #[allow(unused_imports)]
+mod functions;
 use std::{
     io::{self, Write},
     process::ExitCode,
 };
-
-fn echo(input: Vec<&str>) -> () {
-    for w in input {
-        print!("{w} ");
-    }
-    println!();
-}
-
-fn command_type(input: Vec<&str>) -> () {
-    let valid_commands = vec!["echo", "type", "exit"];
-
-    for cmd in input {
-        if valid_commands.contains(&cmd) {
-            println!("{} is a shell builtin", cmd);
-        } else {
-            println!("{}: not found", cmd);
-        }
-    }
-}
-
-fn exit_shell(input: &str) -> ExitCode {
-    let status = input.parse::<u8>().unwrap_or(0);
-    ExitCode::from(status)
-}
 
 fn main() -> ExitCode {
     loop {
@@ -38,26 +15,16 @@ fn main() -> ExitCode {
         stdin.read_line(&mut input).unwrap();
         input = input.trim().to_string();
 
-        let mut command_args: Vec<&str> = input.split_whitespace().collect();
-        let mut command: &str = " ";
+        let mut args: Vec<&str> = input.split_whitespace().collect();
+        let command: &str = if args.len() > 0 { args[0] } else { " " };
+        args = if args.len() > 1 { args[1..].to_vec() } else { vec!["0"] };
 
-        if command_args.len() > 0 {
-            command = command_args[0];
-        }
-        if command_args.len() > 1 {
-            command_args = command_args[1..].to_vec();
-        }
-
-        if command == "echo" {
-            echo(command_args);
-        } else if command == "type" {
-            command_type(command_args);
-        } else if command == "exit" {
-            return exit_shell(command_args[0]);
-        } else if command == " " {
-            // do nothing
-        } else {
-            println!("{}: command not found", command);
+        match command {
+            "echo" => functions::echo(args),
+            "type" => functions::command_type(args),
+            "exit" => return functions::exit_shell(args[0]),
+            " " => continue,
+            _ => println!("{}: command not found", command)
         }
     }
 }
