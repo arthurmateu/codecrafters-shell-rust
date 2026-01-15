@@ -17,14 +17,21 @@ fn main() -> ExitCode {
 
         let mut args: Vec<&str> = input.split_whitespace().collect();
         let command: &str = if args.len() > 0 { args[0] } else { " " };
-        args = if args.len() > 1 { args[1..].to_vec() } else { vec!["0"] };
+        args = if args.len() > 1 { args[1..].to_vec() } else { vec![" "] };
 
         match command {
             "echo" => functions::echo(args),
             "type" => functions::command_type(args),
             "exit" => return functions::exit_shell(args[0]),
             " " => continue,
-            _ => println!("{}: command not found", command)
+            _ => {
+                let cmd = functions::which(command);
+                if cmd.is_some() {
+                    functions::run_command(command, args);
+                } else {
+                    println!("{}: command not found", command)
+                }
+            }
         }
     }
 }

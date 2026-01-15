@@ -1,5 +1,5 @@
 use std::{
-    collections::HashSet, env, os::unix::fs::PermissionsExt, path::{Path, PathBuf}, process::ExitCode
+    collections::HashSet, env, io::{self, Write}, os::unix::fs::PermissionsExt, path::{Path, PathBuf}, process::{Command, ExitCode, Output}
 };
 
 pub fn echo(input: Vec<&str>) -> () {
@@ -20,7 +20,17 @@ pub fn command_type(input: Vec<&str>) -> () {
     }
 }
 
-fn which(cmd: &str) -> Option<String> {
+pub fn run_command(cmd: &str, args: Vec<&str>) -> () {
+    let output = Command::new(cmd)
+        .args(args)
+        .output()
+        .expect("Failed to execute process");
+
+    let _ = io::stdout().write_all(&output.stdout);
+    let _ = io::stderr().write_all(&output.stderr);
+}
+
+pub fn which(cmd: &str) -> Option<String> {
     env::var("PATH")
         .unwrap()
         .split(":")
