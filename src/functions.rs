@@ -7,7 +7,7 @@ pub fn echo(input: Vec<&str>) -> () {
 }
 
 pub fn command_type(input: Vec<&str>) -> () {
-    let builtins = HashSet::from(["echo", "type", "exit"]);
+    let builtins = HashSet::from(["echo", "type", "exit", "pwd"]);
     let cmd = input.first().unwrap();
     let full_path = which(cmd);
 
@@ -47,6 +47,10 @@ pub fn which(cmd: &str) -> Option<String> {
 
 fn is_executable(cmd: &PathBuf) -> bool {
     cmd.metadata().unwrap().permissions().mode() & 0o111 != 0
+}
+
+pub fn pwd() -> () {
+    println!("{}", env::current_dir().expect("Insufficient permissions to access current directory").to_str().unwrap());
 }
 
 pub fn exit_shell(input: &str) -> ExitCode {

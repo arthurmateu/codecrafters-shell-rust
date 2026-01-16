@@ -22,11 +22,11 @@ fn main() -> ExitCode {
         match command {
             "echo" => functions::echo(args),
             "type" => functions::command_type(args),
+            "pwd" => functions::pwd(),
             "exit" => return functions::exit_shell(args[0]),
             " " => continue,
             _ => {
-                let cmd = functions::which(command);
-                if cmd.is_some() {
+                if functions::which(command).is_some() {
                     functions::run_command(command, args);
                 } else {
                     println!("{}: command not found", command)
