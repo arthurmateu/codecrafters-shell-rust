@@ -23,6 +23,7 @@ fn main() -> ExitCode {
             "echo" => functions::echo(args),
             "type" => functions::command_type(args),
             "pwd" => functions::pwd(),
+            "cd" => functions::change_directory(args),
             "exit" => return functions::exit_shell(args[0]),
             " " => continue,
             _ => {

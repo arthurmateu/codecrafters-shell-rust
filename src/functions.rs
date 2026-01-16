@@ -45,12 +45,23 @@ pub fn which(cmd: &str) -> Option<String> {
         })
 }
 
+pub fn change_directory(args: Vec<&str>) -> () {
+    let path = args.first().expect("No directory given");
+    if env::set_current_dir(path).is_err() {
+        println!("cd: {}: No such file or directory", path)
+    }
+}
+
 fn is_executable(cmd: &PathBuf) -> bool {
     cmd.metadata().unwrap().permissions().mode() & 0o111 != 0
 }
 
 pub fn pwd() -> () {
-    println!("{}", env::current_dir().expect("Insufficient permissions to access current directory").to_str().unwrap());
+    println!("{}", working_directory());
+}
+
+fn working_directory() -> String {
+    env::current_dir().expect("Insufficient permissions to access current directory").to_str().unwrap().to_string()
 }
 
 pub fn exit_shell(input: &str) -> ExitCode {
