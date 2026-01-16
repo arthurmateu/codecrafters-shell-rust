@@ -46,8 +46,11 @@ pub fn which(cmd: &str) -> Option<String> {
 }
 
 pub fn change_directory(args: Vec<&str>) -> () {
-    let path = args.first().expect("No directory given");
-    if env::set_current_dir(path).is_err() {
+    let path = args.first()
+                           .expect("No directory given")
+                           .replace("~", env::home_dir().unwrap().to_str().unwrap());
+
+    if env::set_current_dir(&path).is_err() {
         println!("cd: {}: No such file or directory", path)
     }
 }
