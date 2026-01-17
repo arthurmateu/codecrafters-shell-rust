@@ -2,27 +2,31 @@ use std::{
     collections::HashSet, env, io::{self, Write}, os::unix::fs::PermissionsExt, path::{Path, PathBuf}, process::{Command, ExitCode, Output}
 };
 
-pub fn echo(input: Vec<&str>) -> () {
-    println!("{}", input.join(" "));
+pub fn echo(input: Option<Vec<&str>>) -> () {
+    println!("{}", input.unwrap_or_default().join(" "));
 }
 
-pub fn command_type(input: Vec<&str>) -> () {
-    let builtins = HashSet::from(["echo", "type", "exit", "pwd"]);
-    let cmd = input.first().unwrap();
-    let full_path = which(cmd);
+pub fn command_type(args: Option<Vec<&str>>) -> () {
+    let builtins = HashSet::from(["echo", "type", "exit", "pwd", "cd"]);
+    if args.is_none() {
+        println!("Usage: type <command>");
+        return
+    }
+    let tmp = args.unwrap();
+    let cmd = tmp.first().unwrap();
 
     if builtins.contains(cmd) {
-        println!("{} is a shell builtin", cmd);
-    } else if full_path.is_some() {
-        println!("{} is {}", cmd, full_path.unwrap());
+        println!("{cmd} is a shell builtin");
+    } else if let Some(path) = which(cmd) {
+        println!("{cmd} is {path}");
     } else {
-        println!("{}: not found", cmd);
+        println!("{cmd}: not found");
     }
 }
 
-pub fn run_command(cmd: &str, args: Vec<&str>) -> () {
+pub fn run_command(cmd: &str, args: Option<Vec<&str>>) -> () {
     let output = Command::new(cmd)
-        .args(args)
+        .args(args.unwrap_or_default())
         .output()
         .expect("Failed to execute process");
 
@@ -45,8 +49,9 @@ pub fn which(cmd: &str) -> Option<String> {
         })
 }
 
-pub fn change_directory(args: Vec<&str>) -> () {
-    let path = args.first()
+pub fn change_directory(args: Option<Vec<&str>>) -> () {
+    let path = args.unwrap_or(vec!["~"])
+                           .first()
                            .expect("No directory given")
                            .replace("~", env::home_dir().unwrap().to_str().unwrap());
 
@@ -67,7 +72,12 @@ fn working_directory() -> String {
     env::current_dir().expect("Insufficient permissions to access current directory").to_str().unwrap().to_string()
 }
 
-pub fn exit_shell(input: &str) -> ExitCode {
-    let status = input.parse::<u8>().unwrap_or(0);
+pub fn exit_shell(input: Option<Vec<&str>>) -> ExitCode {
+    let tmp = input.unwrap_or(vec![&"0"]);
+    let status = tmp.first()
+                        .unwrap()
+                        .parse::<u8>()
+                        .unwrap_or(0);
+
     ExitCode::from(status)
 }
